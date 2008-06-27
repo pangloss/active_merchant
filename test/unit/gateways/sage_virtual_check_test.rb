@@ -59,6 +59,35 @@ class SageVirtualCheckTest < Test::Unit::TestCase
     assert_equal  "0",                    response.params["authentication_indicator"]
     assert_equal  nil,                    response.params["authentication_disclosure"]
   end
+
+  def test_successful_business_purchase
+    @gateway.expects(:ssl_post).returns(successful_purchase_response)
+    options = { 
+      :order_id => generate_unique_id,
+      :customer_type => 'business',
+      :business_federal_tax_number => '123WAB321',
+      :billing_address => address,
+      :shipping_address => address,
+      :email => 'longbob@example.com'
+    }
+    
+    assert response = @gateway.purchase(@amount, @check, options)
+    assert_instance_of Response, response
+    assert_success response
+    
+    assert_equal "ACCEPTED", response.message
+    assert_equal "C5O8NUdNt0;virtual_check", response.authorization
+                                         
+    assert_equal "A",                    response.params["success"]
+    assert_equal "",                     response.params["code"]
+    assert_equal "ACCEPTED",             response.params["message"]
+    assert_equal "00",                   response.params["risk"]
+    assert_equal "C5O8NUdNt0",           response.params["reference"]
+    assert_equal "89be635e663b05eca587", response.params["order_number"]
+    assert_equal  "0",                   response.params["authentication_indicator"]
+    assert_equal  "NONE",                response.params["authentication_disclosure"]
+  end
+  
   
   private
   def successful_purchase_response

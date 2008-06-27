@@ -47,7 +47,7 @@ module ActiveMerchant #:nodoc:
         # RCK for Returned Checks 
         # ARC for Account Receivable Entry 
         # TEL for TelephoneInitiated
-        post[:C_customer_type] = "WEB"
+        post[:C_customer_type] = customer_type(options)
 
         # Optional  10  Digit Originator  ID – Assigned  By for  each transaction  class  or  business  purpose. If  not provided, the default Originator ID for the specific  Customer Type will be applied.  
         post[:C_originator_id] = options[:originator_id]
@@ -61,10 +61,19 @@ module ActiveMerchant #:nodoc:
         post[:C_dl_state_code] = options[:drivers_license_state]
         post[:C_dl_number]     = options[:drivers_license_number]
         post[:C_dob]           = format_birth_date(options[:date_of_birth])
+        post[:C_ein]           = options[:business_federal_tax_number]
       end
       
       def format_birth_date(date)
         date.respond_to?(:strftime) ? date.strftime("%m/%d/%Y") : date
+      end
+
+      def customer_type(options)
+        case options[:customer_type]
+        when 'business' then 'CCD'
+        when 'personal', nil then 'WEB'
+        else raise ArgumentError, "Unknown customer type #{ options[:customer_type] }"
+        end
       end
 
       # DDA for Checking 

@@ -26,6 +26,21 @@ class RemoteSageCheckTest < Test::Unit::TestCase
     assert response.test?
     assert_false response.authorization.blank?
   end
+
+  def test_successful_business_check_purchase
+    options = { 
+      :order_id => generate_unique_id,
+      :customer_type => 'business',
+      :business_federal_tax_number => '123WAB321',
+      :billing_address => address,
+      :shipping_address => address,
+      :email => 'longbob@example.com'
+    }
+    assert response = @gateway.purchase(@amount, @check, options)
+    assert_success response
+    assert response.test?
+    assert_false response.authorization.blank?
+  end
   
   def test_failed_check_purchase
     @check.routing_number = ""
